@@ -156,7 +156,11 @@ def main(page: ft.Page):
 
     def render_app():
         def build_column(status, color):
-            tasks_in_column = df_global[df_global["Status"] == status].copy()
+            tasks_in_column = (
+                                df_global[df_global["Status"] == status]
+                                .copy()
+                                .sort_values(by="Prioridade", ascending=True, key=lambda col: col.map({"Alta": 0, "Média": 1, "Baixa": 2}))
+                              )
 
             cards = [
                 build_card(row, render_app, df_global, save_data, serialize_subtarefas, parse_subtarefas, page)
