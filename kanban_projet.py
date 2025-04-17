@@ -1,6 +1,8 @@
 import flet as ft
 import pandas as pd
 import os
+from datetime import datetime
+
 
 KANBAN_PATH = "kanban_com_subtarefas.xlsx"
 
@@ -34,6 +36,7 @@ def build_card(row, on_update, df_global, save_data, serialize_subtarefas, parse
         idx = df_global[df_global.Tarefa == row.Tarefa].index[0]
         df_global.at[idx, "Status"] = new_status
         df_global.at[idx, "Subtarefas"] = serialize_subtarefas(subtarefas)
+        df_global.at[idx, "DataModificacao"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         save_data(df_global)
         on_update()
 
@@ -47,6 +50,7 @@ def build_card(row, on_update, df_global, save_data, serialize_subtarefas, parse
             subtarefas.append((new_sub, False))
             idx = df_global[df_global.Tarefa == row.Tarefa].index[0]
             df_global.at[idx, "Subtarefas"] = serialize_subtarefas(subtarefas)
+            df_global.at[idx, "DataModificacao"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             save_data(df_global)
             on_update()
 
@@ -89,7 +93,9 @@ def build_card(row, on_update, df_global, save_data, serialize_subtarefas, parse
             ]),
             ft.Text(f"Prioridade: {row.Prioridade} | Categoria: {row.Categoria}", size=12, italic=True),
             *checkboxes,
-            ft.Row([new_subtask_input, ft.IconButton(icon=ft.icons.ADD, tooltip="Adicionar Subtarefa", on_click=add_subtask)])
+            ft.Row([new_subtask_input, ft.IconButton(icon=ft.icons.ADD, tooltip="Adicionar Subtarefa", on_click=add_subtask)]),
+            ft.Text(f"Criado em: {row.DataCriacao}", size=10, italic=True),
+            ft.Text(f"Última modificação: {row.DataModificacao}", size=10, italic=True),
         ]),
         padding=10,
         margin=5,
@@ -180,6 +186,7 @@ def main(page: ft.Page):
                 task_name = f"{src.content.content.content.controls[0].controls[0].value}"
                 if task_name in df_global.Tarefa.values:
                     idx = df_global[df_global.Tarefa == task_name].index[0]
+                    df_global.at[idx, "DataModificacao"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     df_global.at[idx, "Status"] = status
                     save_data(df_global)
                     page.update()
@@ -269,11 +276,13 @@ def main(page: ft.Page):
                 "Status": "A FAZER",
                 "Categoria": input_category.value,
                 "Prioridade": input_priority.value,
-                "Subtarefas": subtarefas_formatadas
+                "Subtarefas": subtarefas_formatadas,
+                "DataCriacao": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "DataModificacao": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             }
             df_global.loc[len(df_global)] = new_task
             save_data(df_global)
-            page.dialog.open = False
+            page.dialog.open = False    
             page.update()
             render_app()
 
