@@ -74,6 +74,12 @@ def build_card(row, on_update, df_global, save_data, serialize_subtarefas, parse
         page.dialog = confirm_dialog
         confirm_dialog.open = True
         page.update()
+        
+    card_border_color = (
+        ft.colors.RED_900 if row.Prioridade == "Alta"
+        else ft.colors.ORANGE if row.Prioridade == "Média"
+        else ft.colors.BLUE
+    )
 
     card_content = ft.Container(
         content=ft.Column([
@@ -89,7 +95,7 @@ def build_card(row, on_update, df_global, save_data, serialize_subtarefas, parse
         margin=5,
         bgcolor=ft.colors.WHITE,
         border_radius=10,
-        border=ft.border.all(1, ft.colors.GREY_300)
+        border=ft.border.all(10, card_border_color)
     )
 
     return ft.Container(
